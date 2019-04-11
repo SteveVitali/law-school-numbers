@@ -2,6 +2,7 @@ const fs = require('fs');
 const readLine = require('readline');
 
 const t14Map = require('./t14.js').asObject;
+const raceClassMap = require('./race-classes.json');
 
 const RAW_APPS_PATH = 'data/applications/all-applications.json';
 const CLEAN_APPS_PATH = 'data/applications/all-applications-clean.json';
@@ -21,6 +22,13 @@ const transformDate = (v) => v === '--' ? undefined : new Date(v);
 const transformNaStr = (v) => v.indexOf('N/A') !== -1 ? undefined : v;
 const transformNaNum = (v) => v.indexOf('N/A') !== -1 ? undefined : Number(v);
 const isYes = (v) => v.indexOf('Yes') !== -1 ? true : undefined;
+
+const transformRace = (v) => {
+  for (const c in raceClassMap) {
+    if (raceClassMap[c].indexOf(v) !== -1) return c;
+  }
+  return v;
+};
 
 // Map raw app object key names (descriptions of their values in comments)
 // to clean app object key names
@@ -70,7 +78,7 @@ const getCleanKey = (key) => ({
   'Major': { key: 'major', val: transformNaStr },
   'City': { key: 'city', val: transformNaStr },
   'State': { key: 'state', val: transformNaStr },
-  'Race': { key: 'race', val: transformNaStr },
+  'Race': { key: 'race', val: (v) => transformRace(transformNaStr(v)) },
   'Gender': { key: 'gender', val: transformNaStr },
 
   // Has values: 'N/A', 'In Undergrad',

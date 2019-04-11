@@ -1,9 +1,9 @@
 const fs = require('fs');
 const readLine = require('readline');
 
-const ALL_APPS_PATH = 'data/applications/all-applications.json';
+const ALL_APPS_PATH = 'data/applications/t14-applications.json';
 const KEY_VALUES_PATH = (ext) => (
-  'data/applications/application-key-values-counts.' + ext
+  'data/applications/t14-application-key-values-counts.' + ext
 );
 
 const dataStream = fs.createReadStream(ALL_APPS_PATH);
