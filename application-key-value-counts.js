@@ -46,7 +46,7 @@ lineReader.on('close', () => {
   // it takes on in the dataset, sorted desc by their frequency
   const keyValStream = fs.createWriteStream(KEY_VALUES_PATH('txt'));
   for (key in keyValuesSorted) {
-    keyValStream.write(key + '\n');
+    keyValStream.write('KEY: ' + key + '\n');
     keyValuesSorted[key].forEach(({ val, count }) => {
       keyValStream.write('  ' + count + ':\t' + val + '\n');
     });
