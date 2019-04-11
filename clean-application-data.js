@@ -1,23 +1,26 @@
 const fs = require('fs');
 const readLine = require('readline');
 
+const t14Map = require('./t14.js').asObject;
+
 const RAW_APPS_PATH = 'data/applications/all-applications.json';
 const CLEAN_APPS_PATH = 'data/applications/all-applications-clean.json';
+const T14_APPS_PATH = 'data/applications/t14-applications.json';
 
 const dataStream = fs.createReadStream(RAW_APPS_PATH);
 const lineReader = readLine.createInterface(dataStream);
 
 const cleanAppsStream = fs.createWriteStream(CLEAN_APPS_PATH);
+const t14AppsStream = fs.createWriteStream(T14_APPS_PATH);
 
 let rawCount = 0;
 let cleanCount = 0;
-
+let t14Count = 0;
 
 const transformDate = (v) => v === '--' ? undefined : new Date(v);
 const transformNaStr = (v) => v.indexOf('N/A') !== -1 ? undefined : v;
 const transformNaNum = (v) => v.indexOf('N/A') !== -1 ? undefined : Number(v);
 const isYes = (v) => v.indexOf('Yes') !== -1 ? true : undefined;
-
 
 // Map raw app object key names (descriptions of their values in comments)
 // to clean app object key names
@@ -116,13 +119,23 @@ lineReader.on('line', (line) => {
   cleanAppsStream.write(JSON.stringify(cleanObj) + '\n');
   cleanCount += 1;
 
+  if (cleanObj.lawSchool in t14Map) {
+    t14AppsStream.write(JSON.stringify(cleanObj) + '\n');
+    t14Count += 1;
+  }
+
   if (rawCount % 10000 === 0) {
-    console.log('Processed', rawCount, 'raw, wrote', cleanCount, 'clean');
+    console.log(rawCount, 'raw,', cleanCount, 'clean,', t14Count, 't14');
   }
 });
 
 
 lineReader.on('close', () => {
   cleanAppsStream.end();
+  t14AppsStream.end();
+
+  // Wrote 338908 clean apps to data/applications/all-applications-clean.json
+  // Wrote 108911 clean t14 apps to data/applications/t14-applications.json
   console.log('Wrote', cleanCount, 'clean apps to', CLEAN_APPS_PATH);
+  console.log('Wrote', t14Count, 'clean t14 apps to', T14_APPS_PATH);
 });
