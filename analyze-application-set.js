@@ -89,6 +89,9 @@ lineReader.on('line', (line) => {
     if (!uniStatsMap[key][lawSchool]) {
       uniStatsMap[key][lawSchool] = makeEmptyStatsObj();
     }
+    if (!uniStatsMap[key]['All T14']) {
+      uniStatsMap[key]['All T14'] = makeEmptyStatsObj();
+    }
   }
 
   const writeItem = (kind, item, cycle, status, data) => {
@@ -96,6 +99,7 @@ lineReader.on('line', (line) => {
     // console.log('uniStatsMap[' + kind + '][' + lawSchool + '][' +
       // item + ']' + '[' + cycle + '][' + status + '].push(' + data + ')');
     uniStatsMap[kind][lawSchool][item][cycle][status].push(data);
+    uniStatsMap[kind]['All T14'][item][cycle][status].push(data);
     itemCount += 1;
   };
 
@@ -113,9 +117,11 @@ lineReader.on('line', (line) => {
   else kinds.push('Not Under-Represented');
 
   dataPointCount += 1;
+
   kinds.forEach((kind) => {
     writeItems(kind, status);
     writeItems(kind, 'All_Decisions');
+
     if (waitlisted) {
       writeItems(kind, 'Waitlist_' + status);
       writeItems(kind, 'All_Decisions');
@@ -150,6 +156,7 @@ lineReader.on('close', () => {
   const p25 = (list) => stats.percentile(list, 0.25);
   const p50 = (list) => stats.percentile(list, 0.50);
   const p75 = (list) => stats.percentile(list, 0.75);
+
   const msToDays = (ms) => moment.duration(ms).asDays();
   const msToString = (d) => moment(new Date(d)).format('MM/DD/YYYY');
 
@@ -157,6 +164,7 @@ lineReader.on('close', () => {
     for (const school in uniStatsMap[appSet]) {
       for (const cycle in uniStatsMap[appSet][school].lsat) {
         for (const status in uniStatsMap[appSet][school].lsat[cycle]) {
+
           const lsats = uniStatsMap[appSet][school].lsat[cycle][status];
           const gpas = uniStatsMap[appSet][school].gpa[cycle][status];
           const sents = uniStatsMap[appSet][school].sentDate[cycle][status];
@@ -189,11 +197,9 @@ lineReader.on('close', () => {
   }
 
   console.log('Writing CSV output to', CSV_OUT_PATH);
+
   let csvString = '';
-  console.log('CSV lines', csvLines.length);
-  csvLines.forEach((line) => {
-    // console.log(line);
-    csvString += line.join(',') + '\n';
-  });
+  csvLines.forEach((line) => csvString += line.join(',') + '\n');
+
   fs.writeFileSync(CSV_OUT_PATH, csvString);
 });
